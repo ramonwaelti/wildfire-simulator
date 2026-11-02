@@ -1,4 +1,4 @@
-# WILDFIRE — Final minimal Flask project
+# WILDFIRE — minimal Flask project
 
 A simple fictional strategy game. Protect the cabin until the fire stops.
 
