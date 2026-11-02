@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wildfire Simulator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main class="page">
+  <header>
+    <div><h1>Wildfire Simulator</h1><p>Protect the cabin. Remove trees to stop the fire.</p></div>
+    <span class="round">Round {{ game.round }}</span>
+  </header>
+  <div class="content">
+    <section class="board-area" aria-label="Forest">
+      <div class="board" role="group" aria-label="20 by 20 forest grid">
+        {% for row in game.board %}
+          {% set r = loop.index0 %}
+          {% for cell in row %}
+            <form method="post" class="tile-form">
+              <input type="hidden" name="action" value="cut">
+              <input type="hidden" name="row" value="{{ r }}">
+              <input type="hidden" name="col" value="{{ loop.index0 }}">
+              <button class="tile {{ cell }} {% if cell == 'tree' and (r - house_row)|abs <= 2 and (loop.index0 - house_col)|abs <= 2 %}restricted{% endif %}" title="{% if cell == 'tree' and (r - house_row)|abs <= 2 and (loop.index0 - house_col)|abs <= 2 %}Protected zone — no firebreaks{% else %}{{ cell }}{% endif %} at {{ r + 1 }}, {{ loop.index }}"
+                aria-label="{{ cell }} at row {{ r + 1 }}, column {{ loop.index }}"
+                {% if game.status != 'playing' or cell != 'tree' or game.budget == 0 or game.actions == limit or ((r - house_row)|abs <= 2 and (loop.index0 - house_col)|abs <= 2) %}disabled{% endif %}>
+                {% if cell == 'house' %}⌂{% elif cell == 'lost' %}×{% endif %}
+              </button>
+            </form>
+          {% endfor %}
+        {% endfor %}
+      </div>
+      <div class="legend">
+        <span><i class="key tree"></i>Forest</span>
+        <span><i class="key fire"></i>Fire</span>
+        <span><i class="key burned"></i>Burned</span>
+        <span><i class="key empty"></i>Clearing</span>
+        <span><i class="key break"></i>Firebreak</span>
+        <span><i class="key house"></i>Cabin</span>
+      </div>
+    </section>
+    <aside>
+      <div class="detail"><small>MISSION</small>
+        <strong class="status {% if game.status == 'won' %}success{% elif game.status == 'lost' %}failure{% endif %}">
+        {% if game.status == 'won' %}Cabin saved{% elif game.status == 'lost' %}Cabin lost{% else %}Cabin safe{% endif %}</strong>
+      </div>
+      <div class="detail"><small>FIREBREAKS LEFT</small><strong>{{ game.budget }} / 12</strong></div>
+      <div class="detail"><small>ACTIONS THIS ROUND</small><strong>{{ limit - game.actions }} / {{ limit }}</strong></div>
+      <div class="detail"><small>WIND</small><strong>{{ wind }}</strong></div>
+      <div class="detail"><small>HIGH SCORE</small><strong>{{ highscore }} pts</strong></div>
+      {% if game.status == 'won' %}
+      <div class="result">
+        <small>FINAL SCORE</small>
+        <strong>{{ game.score }} pts</strong>
+        <p>{{ saved_trees }} trees × 10 = {{ saved_trees * 10 }}</p>
+        <p>{{ game.budget }} resources × 20 = {{ game.budget * 20 }}</p>
+        {% if game.new_record %}<span class="record">New record</span>{% endif %}
+      </div>
+      {% endif %}
+      <div class="detail muted"><small>ACTIVE FIRE</small><strong>{{ active }} cells</strong></div>
+      <form method="post"><input type="hidden" name="action" value="next">
+        <button class="next" {% if game.status != 'playing' %}disabled{% endif %}>Next round →</button>
+      </form>
+      <form method="post"><input type="hidden" name="action" value="reset"><button class="reset">New game</button></form>
+      {% if game.message %}<p class="message" role="status">{{ game.message }}</p>{% endif %}
+      <div class="rules"><small>HOW TO PLAY</small>
+        <p>1. Click a green tile to build a firebreak.</p>
+        <p>2. You have 12 firebreaks, max. 3 per round.</p>
+        <p>3. Protect the cabin until the fire goes out.</p>
+        <p class="note">Striped cells around the cabin are restricted. Wind changes every 3 rounds.</p>
+      </div>
+    </aside>
+  </div>
+  <footer>Simple fictional model · Python + Flask</footer>
+</main>
+</body>
+</html>
