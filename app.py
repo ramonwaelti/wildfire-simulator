@@ -1,4 +1,4 @@
-"""Wildfire: a small, fictional firebreak strategy game built with Flask."""
+#Wildfire: a small, fictional firebreak strategy game built with Flask
 import json
 import random
 import secrets
@@ -6,22 +6,22 @@ from pathlib import Path
 from flask import Flask, render_template, request, redirect, session, url_for
 
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(24)  # Local demo; new secret each server restart.
+app.secret_key = secrets.token_hex(24)  #local demo; new secret each server restart.
 
 SIZE = 20
 HOUSE = (10, 14)
 START_FIRE = [(9, 2), (10, 2), (11, 2)]
-CLEARINGS = 20  # 5% of 400 cells.
+CLEARINGS = 20  #5% of 400 cells.
 BUDGET = 12
 ACTIONS_PER_ROUND = 3
 WINDS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 WIND_LABELS = ['E →', 'S ↓', 'W ←', 'N ↑']
-GAMES = {}  # Game state for the local demo.
+GAMES = {}  #game state for the local demo.
 SCORE_FILE = Path(__file__).resolve().parent / 'highscore.json'
 
 
 def load_highscore():
-    #Read the best score, or return zero for a new installation
+    #read the best score, or return zero for a new installation
     try:
         return int(json.loads(SCORE_FILE.read_text(encoding='utf-8'))['score'])
     except (FileNotFoundError, ValueError, KeyError, TypeError):
@@ -29,13 +29,13 @@ def load_highscore():
 
 
 def calculate_score(game):
-    """Reward surviving forest and unused firebreaks after a victory."""
+    #Reward surviving forest and unused firebreaks after a victory
     trees = sum(cell == 'tree' for row in game['board'] for cell in row)
     return trees * 10 + game['budget'] * 20
 
 
 def save_highscore(score):
-    """Keep the best result across new games and server restarts."""
+    #Keep the best result across new games and server restarts
     if score > load_highscore():
         SCORE_FILE.write_text(json.dumps({'score': score}) + '\n', encoding='utf-8')
         return True
@@ -43,7 +43,7 @@ def save_highscore(score):
 
 
 def create_forest():
-    """Create a new forest with a cabin, three flames, and 20 random clearings."""
+    #Create a new forest with a cabin, three flames, and 20 random clearings
     board = [['tree' for _ in range(SIZE)] for _ in range(SIZE)]
     reserved = {HOUSE, *START_FIRE}
     positions = [(r, c) for r in range(SIZE) for c in range(SIZE)
@@ -60,7 +60,7 @@ def create_forest():
 
 
 def get_neighbors(row, col):
-    """Return orthogonal neighbors and their direction, skipping outer borders."""
+    #Return orthogonal neighbors and their direction, skipping outer borders
     for dr, dc in WINDS:
         nr, nc = row + dr, col + dc
         if 0 <= nr < SIZE and 0 <= nc < SIZE:
@@ -68,7 +68,7 @@ def get_neighbors(row, col):
 
 
 def place_firebreak(game, row, col):
-    """Spend one resource to remove a tree; no construction next to the cabin."""
+    #Spend one resource to remove a tree; no construction next to the cabin
     if game['status'] != 'playing' or game['budget'] == 0:
         return
     if game['actions'] >= ACTIONS_PER_ROUND:
@@ -89,7 +89,7 @@ def place_firebreak(game, row, col):
 
 
 def spread_fire(game):
-    """Burn existing flames out; ignite neighbors from the previous board only."""
+    #Burn existing flames out; ignite neighbors from the previous board only
     old = game['board']
     new = [row[:] for row in old]
     rng = random.Random(game['seed'] + game['round'])
@@ -125,7 +125,7 @@ def spread_fire(game):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    """Show the board and process one button click per request."""
+    #show the board and process one button click per request
     game_id = session.get('game_id')
     if game_id not in GAMES:
         game_id = secrets.token_hex(12)
