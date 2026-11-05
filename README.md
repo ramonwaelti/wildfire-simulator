@@ -1,4 +1,4 @@
-# WILDFIRE — Flask project
+# WILDFIRE SIMULATOR
 
 A simple fictional strategy game. Protect the cabin until the fire stops.
 
