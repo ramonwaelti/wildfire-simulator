@@ -69,7 +69,10 @@ def get_neighbors(row, col):
 
 def place_firebreak(game, row, col):
     #Spend one resource to remove a tree; no construction next to the cabin
-    if game['status'] != 'playing' or game['budget'] == 0:
+    if game['status'] != 'playing':
+        return
+    if game['budget'] == 0:
+    game['message'] = 'No firebreaks left.'
         return
     if game['actions'] >= ACTIONS_PER_ROUND:
         game['message'] = 'No actions left this round.'
