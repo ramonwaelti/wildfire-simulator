@@ -72,7 +72,7 @@ def place_firebreak(game, row, col):
     if game['status'] != 'playing':
         return
     if game['budget'] == 0:
-    game['message'] = 'No firebreaks left.'
+        game['message'] = 'No firebreaks left.'
         return
     if game['actions'] >= ACTIONS_PER_ROUND:
         game['message'] = 'No actions left this round.'
